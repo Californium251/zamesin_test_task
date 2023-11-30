@@ -1,0 +1,41 @@
+{
+    "message": "Request failed with status code 400",
+    "name": "AxiosError",
+    "stack": "AxiosError: Request failed with status code 400\n    at settle (/Users/user/zamesin_test_task/node_modules/axios/dist/node/axios.cjs:1967:12)\n    at IncomingMessage.handleStreamEnd (/Users/user/zamesin_test_task/node_modules/axios/dist/node/axios.cjs:3062:11)\n    at IncomingMessage.emit (node:events:531:35)\n    at endReadableNT (node:internal/streams/readable:1696:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:82:21)",
+    "config": {
+        "transitional": {
+            "silentJSONParsing": true,
+            "forcedJSONParsing": true,
+            "clarifyTimeoutError": false
+        },
+        "adapter": [
+            "xhr",
+            "http"
+        ],
+        "transformRequest": [
+            null
+        ],
+        "transformResponse": [
+            null
+        ],
+        "timeout": 0,
+        "xsrfCookieName": "XSRF-TOKEN",
+        "xsrfHeaderName": "X-XSRF-TOKEN",
+        "maxContentLength": -1,
+        "maxBodyLength": -1,
+        "env": {},
+        "headers": {
+            "Accept": "application/json, text/plain, */*",
+            "Content-Type": "application/json",
+            "Authorization": "Bearer 45830601cf0647402461f40031c607d5bcc65c839cfb0828844e5806cfa9b78a566397d973b531344e56ddbe536041d9c0aba009c8d9814d15a9e5ebcc8f47b559f6530668564eebaf658741946b5b18590fc650f16a7fe646f345e04612e01c90cd1c286055e48e2f8b5780f15b7877e700f25fd3f6deb1851de47e2c5a2f92",
+            "User-Agent": "axios/1.6.2",
+            "Content-Length": "45",
+            "Accept-Encoding": "gzip, compress, deflate, br"
+        },
+        "method": "post",
+        "url": "http://localhost:1337/api/new-users",
+        "data": "{\"data\":{\"email\":\"californium251@gmail.com\"}}"
+    },
+    "code": "ERR_BAD_REQUEST",
+    "status": 400
+}

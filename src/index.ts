@@ -62,12 +62,17 @@ const declineMailOptions: (email: string) => MailOptionsType = (email) => ({
     text: 'К сожалению, вы у вас пока нет доступа. Чтобы он появился, оплатите курс.',
 });
 
+const userExistsMailOptions: (email: string) => MailOptionsType = (email) => ({
+    from: process.env.EMAIL_ADDRESS as string,
+    to: email,
+    subject: 'User already exists!',
+    text: 'Вы и так уже в клубе. Можете переходить к обучению.',
+});
+
 app.get('/check-user', async (req: Request, res: Response) => {
     try {
         const { email } = req.query;
-        console.log('email', email);
         const response = await checkIfUserExists(email);
-        console.log('response', response);
         if (response) {
             try {
                 const token = process.env.TOKEN;
@@ -79,8 +84,10 @@ app.get('/check-user', async (req: Request, res: Response) => {
                 res.send(user.data);
                 transporter.sendMail(acceptMailOptions(email));
             } catch (err) {
-                res.send(err);
-                transporter.sendMail(declineMailOptions(email));
+                if (err instanceof Error) {
+                    res.send({ error: 'User already exists' });
+                    transporter.sendMail(userExistsMailOptions(email));
+                }
             }
         } else {
             transporter.sendMail(declineMailOptions(email));
