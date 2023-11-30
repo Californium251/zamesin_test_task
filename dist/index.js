@@ -51,7 +51,9 @@ const declineMailOptions = (email) => ({
 app.get('/check-user', async (req, res) => {
     try {
         const { email } = req.query;
+        console.log('email', email);
         const response = await checkIfUserExists(email);
+        console.log('response', response);
         if (response) {
             try {
                 const token = process.env.TOKEN;
