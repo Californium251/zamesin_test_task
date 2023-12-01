@@ -1,63 +1,28 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const mailer_1 = require("./mailer");
+const checkIfUserExists_1 = __importDefault(require("./checkIfUserExists"));
 require('dotenv').config();
 const express = require('express');
-const Airtable = require('airtable');
-const nodemailer = require('nodemailer');
+const cors = require('cors');
 const axios = require('axios');
-const app = express();
 const Request = require('express').Request;
 const Response = require('express').Response;
 const port = process.env.PORT || 3000;
-const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY }).base(process.env.AIRTABLE_BASE_ID);
-const tableName = process.env.TABLE_NAME || 'Table 1';
-const checkIfUserExists = async (email) => {
-    return new Promise((resolve, reject) => {
-        base(tableName).select({
-            view: 'Grid view',
-            maxRecords: 1,
-            filterByFormula: `{Email} = '${email}'`,
-        }).firstPage((err, records) => {
-            if (err) {
-                reject(err.message);
-                return;
-            }
-            if (records !== undefined) {
-                resolve(records.length > 0);
-            }
-        });
-    });
+const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+const corsOptions = {
+    origin: frontendUrl,
+    optionsSuccessStatus: 200
 };
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: 587,
-    auth: {
-        user: process.env.EMAIL_ADDRESS,
-        pass: process.env.EMAIL_PASSWORD,
-    },
-});
-const acceptMailOptions = (email) => ({
-    from: process.env.EMAIL_ADDRESS,
-    to: email,
-    subject: 'Welcome to the club!',
-    text: 'Вы приняты в клуб! Поздравляем!',
-});
-const declineMailOptions = (email) => ({
-    from: process.env.EMAIL_ADDRESS,
-    to: email,
-    subject: 'Access denied!',
-    text: 'К сожалению, вы у вас пока нет доступа. Чтобы он появился, оплатите курс.',
-});
-const userExistsMailOptions = (email) => ({
-    from: process.env.EMAIL_ADDRESS,
-    to: email,
-    subject: 'User already exists!',
-    text: 'Вы и так уже в клубе. Можете переходить к обучению.',
-});
+const app = express();
+app.use(cors(corsOptions));
 app.get('/check-user', async (req, res) => {
     try {
         const { email } = req.query;
-        const response = await checkIfUserExists(email);
+        const response = await (0, checkIfUserExists_1.default)(email);
         if (response) {
             try {
                 const token = process.env.TOKEN;
@@ -67,17 +32,18 @@ app.get('/check-user', async (req, res) => {
                     },
                 });
                 res.send(user.data);
-                transporter.sendMail(acceptMailOptions(email));
+                mailer_1.transporter.sendMail((0, mailer_1.acceptMailOptions)(email));
             }
             catch (err) {
-                console.log(err instanceof Error);
-                res.send({ error: 'User already exists' });
-                transporter.sendMail(userExistsMailOptions(email));
+                if (err instanceof Error) {
+                    mailer_1.transporter.sendMail((0, mailer_1.userExistsMailOptions)(email));
+                    res.status(409).send('User already exists');
+                }
             }
         }
         else {
-            transporter.sendMail(declineMailOptions(email));
-            res.send({ error: 'User not found' });
+            mailer_1.transporter.sendMail((0, mailer_1.declineMailOptions)(email));
+            res.status(403).send({ error: 'User not found' });
         }
     }
     catch (error) {
