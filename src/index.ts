@@ -21,7 +21,6 @@ app.use(cors(corsOptions));
 app.get('/check-user', async (req: Request, res: Response) => {
     try {
         const email = req.query.email.toLowerCase();
-        console.log(email);
         const response = await checkIfUserExists(email);
         console.log(response);
         if (response) {
@@ -32,6 +31,7 @@ app.get('/check-user', async (req: Request, res: Response) => {
                         Authorization: `Bearer ${token}`,
                     },
                 });
+                console.log(user.data);
                 res.send(user.data);
                 transporter.sendMail(acceptMailOptions(email));
             } catch (err) {
