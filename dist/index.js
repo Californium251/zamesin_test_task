@@ -21,12 +21,17 @@ const app = express();
 app.use(cors(corsOptions));
 app.get('/check-user', async (req, res) => {
     try {
-        const { email } = req.query;
+        const email = req.query.email.toLowerCase();
         const response = await (0, checkIfUserExists_1.default)(email);
         if (response) {
             try {
                 const token = process.env.TOKEN;
-                const user = await axios.post(process.env.STRAPI_URL, { data: { email } }, {
+                const user = await axios.post(process.env.STRAPI_URL, {
+                    email,
+                    username: email.split('@')[0],
+                    password: 'password',
+                    role: '1'
+                }, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -36,6 +41,7 @@ app.get('/check-user', async (req, res) => {
             }
             catch (err) {
                 if (err instanceof Error) {
+                    console.log(err);
                     mailer_1.transporter.sendMail((0, mailer_1.userExistsMailOptions)(email));
                     res.status(409).send('User already exists');
                 }
@@ -43,7 +49,7 @@ app.get('/check-user', async (req, res) => {
         }
         else {
             mailer_1.transporter.sendMail((0, mailer_1.declineMailOptions)(email));
-            res.status(403).send({ error: 'User not found' });
+            res.status(403).send('User not found');
         }
     }
     catch (error) {

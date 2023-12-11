@@ -22,27 +22,31 @@ app.get('/check-user', async (req: Request, res: Response) => {
     try {
         const email = req.query.email.toLowerCase();
         const response = await checkIfUserExists(email);
-        console.log(response);
         if (response) {
             try {
                 const token = process.env.TOKEN;
-                const user = await axios.post(process.env.STRAPI_URL, { data: { email } }, {
+                const user = await axios.post(process.env.STRAPI_URL, {
+                    email,
+                    username: email.split('@')[0],
+                    password: 'password',
+                    role: '1'
+                }, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 });
-                console.log(user.data);
                 res.send(user.data);
                 transporter.sendMail(acceptMailOptions(email));
             } catch (err) {
                 if (err instanceof Error) {
+                    console.log(err);
                     transporter.sendMail(userExistsMailOptions(email));
                     res.status(409).send('User already exists');
                 }
             }
         } else {
             transporter.sendMail(declineMailOptions(email));
-            res.status(403).send({ error: 'User not found' });
+            res.status(403).send('User not found');
         }
     } catch (error) {
         if (error instanceof Error) {
